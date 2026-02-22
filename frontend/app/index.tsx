@@ -1099,6 +1099,50 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingVertical: 32,
   },
+  pieChartContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    width: '100%',
+    paddingVertical: 16,
+  },
+  pieCenter: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pieCenterValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  pieCenterLabel: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 4,
+  },
+  pieLegend: {
+    gap: 12,
+  },
+  pieLegendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  barChartContainer: {
+    paddingHorizontal: 10,
+    paddingVertical: 16,
+  },
+  barLegend: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 16,
+    marginTop: 16,
+  },
+  barLegendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
   legendContainer: {
     marginTop: 16,
     flexDirection: 'row',
