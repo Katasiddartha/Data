@@ -51,6 +51,11 @@ cd frontend
 yarn install
 # or
 npm install
+
+# Install additional required package
+yarn add expo-linear-gradient
+# or
+npm install expo-linear-gradient
 ```
 
 ### Configure Environment Variables
