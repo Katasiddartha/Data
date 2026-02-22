@@ -76,6 +76,144 @@ async def get_status_checks():
     status_checks = await db.status_checks.find().to_list(1000)
     return [StatusCheck(**status_check) for status_check in status_checks]
 
+# Google Sheets Endpoints
+def fetch_google_sheets_data():
+    """Fetch data from Google Sheets"""
+    try:
+        service = build('sheets', 'v4', developerKey=GOOGLE_SHEETS_API_KEY)
+        sheet = service.spreadsheets()
+        result = sheet.values().get(
+            spreadsheetId=GOOGLE_SHEET_ID,
+            range='A:G'  # Columns: Date, Tester, Module, Test Cases, Passed, Failed, Build
+        ).execute()
+        
+        values = result.get('values', [])
+        
+        if not values:
+            return []
+        
+        # Skip header row
+        data_rows = values[1:]
+        test_data = []
+        
+        for row in data_rows:
+            if len(row) >= 7:  # Ensure all columns are present
+                try:
+                    test_data.append({
+                        'date': row[0],
+                        'tester': row[1],
+                        'module': row[2],
+                        'test_cases': int(row[3]) if row[3].isdigit() else 0,
+                        'passed': int(row[4]) if row[4].isdigit() else 0,
+                        'failed': int(row[5]) if row[5].isdigit() else 0,
+                        'build': row[6]
+                    })
+                except (ValueError, IndexError) as e:
+                    logger.warning(f"Skipping row due to error: {e}")
+                    continue
+        
+        return test_data
+    
+    except HttpError as error:
+        logger.error(f"Google Sheets API error: {error}")
+        raise
+    except Exception as error:
+        logger.error(f"Error fetching Google Sheets data: {error}")
+        raise
+
+@api_router.get("/test-data", response_model=List[TestData])
+async def get_test_data(
+    tester: Optional[str] = Query(None),
+    module: Optional[str] = Query(None),
+    build: Optional[str] = Query(None),
+    date_from: Optional[str] = Query(None),
+    date_to: Optional[str] = Query(None)
+):
+    """Get test data with optional filters"""
+    data = fetch_google_sheets_data()
+    
+    # Apply filters
+    if tester:
+        data = [d for d in data if d['tester'].lower() == tester.lower()]
+    if module:
+        data = [d for d in data if d['module'].lower() == module.lower()]
+    if build:
+        data = [d for d in data if d['build'].lower() == build.lower()]
+    if date_from:
+        data = [d for d in data if d['date'] >= date_from]
+    if date_to:
+        data = [d for d in data if d['date'] <= date_to]
+    
+    return data
+
+@api_router.get("/test-data/summary", response_model=TestDataSummary)
+async def get_test_data_summary(
+    tester: Optional[str] = Query(None),
+    module: Optional[str] = Query(None),
+    build: Optional[str] = Query(None),
+    date_from: Optional[str] = Query(None),
+    date_to: Optional[str] = Query(None)
+):
+    """Get aggregated test data summary"""
+    data = fetch_google_sheets_data()
+    
+    # Apply filters (same as above)
+    if tester:
+        data = [d for d in data if d['tester'].lower() == tester.lower()]
+    if module:
+        data = [d for d in data if d['module'].lower() == module.lower()]
+    if build:
+        data = [d for d in data if d['build'].lower() == build.lower()]
+    if date_from:
+        data = [d for d in data if d['date'] >= date_from]
+    if date_to:
+        data = [d for d in data if d['date'] <= date_to]
+    
+    if not data:
+        return TestDataSummary(
+            total_tests=0,
+            total_passed=0,
+            total_failed=0,
+            pass_rate=0.0,
+            total_testers=0,
+            total_modules=0,
+            total_builds=0
+        )
+    
+    total_tests = sum(d['test_cases'] for d in data)
+    total_passed = sum(d['passed'] for d in data)
+    total_failed = sum(d['failed'] for d in data)
+    pass_rate = (total_passed / total_tests * 100) if total_tests > 0 else 0.0
+    
+    unique_testers = len(set(d['tester'] for d in data))
+    unique_modules = len(set(d['module'] for d in data))
+    unique_builds = len(set(d['build'] for d in data))
+    
+    return TestDataSummary(
+        total_tests=total_tests,
+        total_passed=total_passed,
+        total_failed=total_failed,
+        pass_rate=round(pass_rate, 2),
+        total_testers=unique_testers,
+        total_modules=unique_modules,
+        total_builds=unique_builds
+    )
+
+@api_router.get("/test-data/filters")
+async def get_filter_options():
+    """Get available filter options (testers, modules, builds)"""
+    data = fetch_google_sheets_data()
+    
+    testers = sorted(list(set(d['tester'] for d in data)))
+    modules = sorted(list(set(d['module'] for d in data)))
+    builds = sorted(list(set(d['build'] for d in data)))
+    
+    return {
+        "testers": testers,
+        "modules": modules,
+        "builds": builds
+    }
+
 # Include the router in the main app
 app.include_router(api_router)
 
