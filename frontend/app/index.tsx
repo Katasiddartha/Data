@@ -141,6 +141,101 @@ export default function Index() {
     });
   };
 
+  const getTesterBarData = () => {
+    const testerMap = new Map<string, { passed: number; failed: number; total: number }>();
+    testData.forEach((item) => {
+      const existing = testerMap.get(item.tester) || { passed: 0, failed: 0, total: 0 };
+      testerMap.set(item.tester, {
+        passed: existing.passed + item.passed,
+        failed: existing.failed + item.failed,
+        total: existing.total + item.test_cases,
+      });
+    });
+
+    const testers = Array.from(testerMap.keys());
+    const barData: any[] = [];
+    
+    testers.forEach((tester, index) => {
+      const data = testerMap.get(tester)!;
+      barData.push({
+        value: data.total,
+        label: tester.split(' ')[0], // First name only
+        frontColor: '#007AFF',
+        spacing: 2,
+        labelWidth: 60,
+        labelTextStyle: { fontSize: 10 },
+      });
+      barData.push({
+        value: data.passed,
+        frontColor: '#34C759',
+      });
+      barData.push({
+        value: data.failed,
+        frontColor: '#FF3B30',
+      });
+    });
+
+    return barData;
+  };
+
+  const getModuleBarData = () => {
+    const moduleMap = new Map<string, { passed: number; failed: number; total: number }>();
+    testData.forEach((item) => {
+      const existing = moduleMap.get(item.module) || { passed: 0, failed: 0, total: 0 };
+      moduleMap.set(item.module, {
+        passed: existing.passed + item.passed,
+        failed: existing.failed + item.failed,
+        total: existing.total + item.test_cases,
+      });
+    });
+
+    // Get top 6 modules by total tests
+    const sortedModules = Array.from(moduleMap.entries())
+      .sort((a, b) => b[1].total - a[1].total)
+      .slice(0, 6);
+
+    const barData: any[] = [];
+    
+    sortedModules.forEach(([module, data]) => {
+      barData.push({
+        value: data.total,
+        label: module.length > 8 ? module.substring(0, 8) + '...' : module,
+        frontColor: '#007AFF',
+        spacing: 2,
+        labelWidth: 70,
+        labelTextStyle: { fontSize: 9 },
+      });
+      barData.push({
+        value: data.passed,
+        frontColor: '#34C759',
+      });
+      barData.push({
+        value: data.failed,
+        frontColor: '#FF3B30',
+      });
+    });
+
+    return barData;
+  };
+
+  const getPieChartData = () => {
+    const totalPassed = testData.reduce((sum, item) => sum + item.passed, 0);
+    const totalFailed = testData.reduce((sum, item) => sum + item.failed, 0);
+
+    return [
+      {
+        value: totalPassed,
+        color: '#34C759',
+        text: `${totalPassed}`,
+      },
+      {
+        value: totalFailed,
+        color: '#FF3B30',
+        text: `${totalFailed}`,
+      },
+    ];
+  };
+
   if (loading) {
     return (
       <View style={styles.centerContainer}>
