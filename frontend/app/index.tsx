@@ -448,7 +448,131 @@ export default function Index() {
 
         {activeView === 'chart' && (
           <View style={styles.chartContainer}>
-            <Text style={styles.sectionTitle}>Test Cases Trend Over Time</Text>
+            {/* Pie Chart - Pass/Fail Distribution */}
+            <Text style={styles.sectionTitle}>Pass/Fail Distribution</Text>
+            <View style={styles.chartWrapper}>
+              {getPieChartData().length > 0 && getPieChartData()[0].value + getPieChartData()[1].value > 0 ? (
+                <View style={styles.pieChartContainer}>
+                  <PieChart
+                    data={getPieChartData()}
+                    donut
+                    radius={90}
+                    innerRadius={50}
+                    centerLabelComponent={() => (
+                      <View style={styles.pieCenter}>
+                        <Text style={styles.pieCenterValue}>
+                          {summary?.pass_rate || 0}%
+                        </Text>
+                        <Text style={styles.pieCenterLabel}>Pass Rate</Text>
+                      </View>
+                    )}
+                  />
+                  <View style={styles.pieLegend}>
+                    <View style={styles.pieLegendItem}>
+                      <View style={[styles.legendDot, { backgroundColor: '#34C759' }]} />
+                      <Text style={styles.legendText}>
+                        Passed: {getPieChartData()[0].value}
+                      </Text>
+                    </View>
+                    <View style={styles.pieLegendItem}>
+                      <View style={[styles.legendDot, { backgroundColor: '#FF3B30' }]} />
+                      <Text style={styles.legendText}>
+                        Failed: {getPieChartData()[1].value}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              ) : (
+                <Text style={styles.noDataText}>No data available for pie chart</Text>
+              )}
+            </View>
+
+            {/* Bar Chart - By Tester */}
+            <Text style={[styles.sectionTitle, { marginTop: 24 }]}>
+              Test Results by Tester
+            </Text>
+            <View style={styles.chartWrapper}>
+              {getTesterBarData().length > 0 ? (
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <View style={styles.barChartContainer}>
+                    <BarChart
+                      data={getTesterBarData()}
+                      height={220}
+                      barWidth={22}
+                      spacing={16}
+                      noOfSections={4}
+                      yAxisThickness={1}
+                      xAxisThickness={1}
+                      xAxisColor={'#ddd'}
+                      yAxisColor={'#ddd'}
+                      yAxisTextStyle={{ color: '#666', fontSize: 10 }}
+                      isAnimated
+                    />
+                    <View style={styles.barLegend}>
+                      <View style={styles.barLegendItem}>
+                        <View style={[styles.legendDot, { backgroundColor: '#007AFF' }]} />
+                        <Text style={styles.legendText}>Total</Text>
+                      </View>
+                      <View style={styles.barLegendItem}>
+                        <View style={[styles.legendDot, { backgroundColor: '#34C759' }]} />
+                        <Text style={styles.legendText}>Passed</Text>
+                      </View>
+                      <View style={styles.barLegendItem}>
+                        <View style={[styles.legendDot, { backgroundColor: '#FF3B30' }]} />
+                        <Text style={styles.legendText}>Failed</Text>
+                      </View>
+                    </View>
+                  </View>
+                </ScrollView>
+              ) : (
+                <Text style={styles.noDataText}>No data available for tester chart</Text>
+              )}
+            </View>
+
+            {/* Bar Chart - By Module */}
+            <Text style={[styles.sectionTitle, { marginTop: 24 }]}>
+              Test Results by Module (Top 6)
+            </Text>
+            <View style={styles.chartWrapper}>
+              {getModuleBarData().length > 0 ? (
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <View style={styles.barChartContainer}>
+                    <BarChart
+                      data={getModuleBarData()}
+                      height={220}
+                      barWidth={22}
+                      spacing={16}
+                      noOfSections={4}
+                      yAxisThickness={1}
+                      xAxisThickness={1}
+                      xAxisColor={'#ddd'}
+                      yAxisColor={'#ddd'}
+                      yAxisTextStyle={{ color: '#666', fontSize: 10 }}
+                      isAnimated
+                    />
+                    <View style={styles.barLegend}>
+                      <View style={styles.barLegendItem}>
+                        <View style={[styles.legendDot, { backgroundColor: '#007AFF' }]} />
+                        <Text style={styles.legendText}>Total</Text>
+                      </View>
+                      <View style={styles.barLegendItem}>
+                        <View style={[styles.legendDot, { backgroundColor: '#34C759' }]} />
+                        <Text style={styles.legendText}>Passed</Text>
+                      </View>
+                      <View style={styles.barLegendItem}>
+                        <View style={[styles.legendDot, { backgroundColor: '#FF3B30' }]} />
+                        <Text style={styles.legendText}>Failed</Text>
+                      </View>
+                    </View>
+                  </View>
+                </ScrollView>
+              ) : (
+                <Text style={styles.noDataText}>No data available for module chart</Text>
+              )}
+            </View>
+
+            {/* Line Chart - Trend Over Time */}
+            <Text style={[styles.sectionTitle, { marginTop: 24 }]}>Test Cases Trend Over Time</Text>
             <View style={styles.chartWrapper}>
               {getChartData().length > 0 ? (
                 <LineChart
@@ -474,11 +598,11 @@ export default function Index() {
                   areaChart
                 />
               ) : (
-                <Text style={styles.noDataText}>No data available for chart</Text>
+                <Text style={styles.noDataText}>No data available for line chart</Text>
               )}
             </View>
 
-            {/* Chart Legend */}
+            {/* Legend for Line Chart */}
             <View style={styles.legendContainer}>
               <View style={styles.legendItem}>
                 <View style={[styles.legendDot, { backgroundColor: '#007AFF' }]} />
