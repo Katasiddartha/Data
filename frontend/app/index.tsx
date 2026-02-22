@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import { LineChart } from 'react-native-gifted-charts';
+import { LineChart, BarChart, PieChart } from 'react-native-gifted-charts';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
