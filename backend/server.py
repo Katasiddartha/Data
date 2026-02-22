@@ -28,6 +28,10 @@ app = FastAPI()
 api_router = APIRouter(prefix="/api")
 
 
+# Google Sheets Configuration
+GOOGLE_SHEETS_API_KEY = os.environ.get('GOOGLE_SHEETS_API_KEY')
+GOOGLE_SHEET_ID = os.environ.get('GOOGLE_SHEET_ID')
+
 # Define Models
 class StatusCheck(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -36,6 +40,24 @@ class StatusCheck(BaseModel):
 
 class StatusCheckCreate(BaseModel):
     client_name: str
+
+class TestData(BaseModel):
+    date: str
+    tester: str
+    module: str
+    test_cases: int
+    passed: int
+    failed: int
+    build: str
+
+class TestDataSummary(BaseModel):
+    total_tests: int
+    total_passed: int
+    total_failed: int
+    pass_rate: float
+    total_testers: int
+    total_modules: int
+    total_builds: int
 
 # Add your routes to the router instead of directly to app
 @api_router.get("/")
